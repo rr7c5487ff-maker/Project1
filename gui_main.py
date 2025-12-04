@@ -1,82 +1,115 @@
-"""
-gui_main.py
-PyQt6 User Interface for the grading application.
-"""
-
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel, QPushButton,
-    QLineEdit, QListWidget, QMessageBox
+    QApplication, QWidget, QVBoxLayout, QLabel, QPushButton,
+    QLineEdit, QHBoxLayout, QTableWidget, QTableWidgetItem, QMessageBox
 )
-from PyQt6.QtCore import Qt
-from grading_logic import GradeCalculator
+from grading_logic import GradingLogic
 from data_storage import DataStorage
-import styles
 
 
-class GradeApp(QWidget):
-    """Main window for grade calculation interface."""
-
+class GradeGUI(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Student Grading System")
-        self.setStyleSheet(f"background-color: {styles.BACKGROUND};")
 
-        self.scores: list[float] = []
+        self.setWindowTitle("Student Grade Calculator")
+        self.setGeometry(400, 200, 600, 400)
 
-        self.layout = QVBoxLayout()
+        # Logic + storage
+        self.logic = GradingLogic()
+        self.storage = DataStorage()
 
-        # Input Label
-        self.label = QLabel("Enter a score:")
-        self.layout.addWidget(self.label)
+        # Data list
+        self.names = []
+        self.scores = []
 
-        # Textbox
+        # Layout
+        layout = QVBoxLayout()
+
+        # Name input
+        name_layout = QHBoxLayout()
+        self.name_input = QLineEdit()
+        self.name_input.setPlaceholderText("Student Name")
+        name_layout.addWidget(QLabel("Name:"))
+        name_layout.addWidget(self.name_input)
+        layout.addLayout(name_layout)
+
+        # Score input
+        score_layout = QHBoxLayout()
         self.score_input = QLineEdit()
-        self.score_input.setStyleSheet(f"background-color: {styles.TEXTBOX};")
-        self.layout.addWidget(self.score_input)
+        self.score_input.setPlaceholderText("Score (0-100)")
+        score_layout.addWidget(QLabel("Score:"))
+        score_layout.addWidget(self.score_input)
+        layout.addLayout(score_layout)
 
-        # Add Button
-        self.add_button = QPushButton("Add Score")
-        self.add_button.setStyleSheet(f"background-color: {styles.BUTTON}; color: white;")
-        self.add_button.clicked.connect(self.add_score)
-        self.layout.addWidget(self.add_button)
+        # Add student button
+        add_button = QPushButton("Add Student")
+        add_button.clicked.connect(self.add_student)
+        layout.addWidget(add_button)
 
-        # Score Display
-        self.score_list = QListWidget()
-        self.layout.addWidget(self.score_list)
+        # Calculate grades button
+        calc_button = QPushButton("Calculate Grades")
+        calc_button.clicked.connect(self.calculate_grades)
+        layout.addWidget(calc_button)
 
-        # Calculate Grades Button
-        self.calc_button = QPushButton("Calculate Grades")
-        self.calc_button.setStyleSheet(f"background-color: {styles.BUTTON}; color: white;")
-        self.calc_button.clicked.connect(self.calculate_grades)
-        self.layout.addWidget(self.calc_button)
+        # Save CSV button
+        save_button = QPushButton("Save to CSV")
+        save_button.clicked.connect(self.save_csv)
+        layout.addWidget(save_button)
 
-        self.setLayout(self.layout)
+        # Table display
+        self.table = QTableWidget()
+        self.table.setColumnCount(3)
+        self.table.setHorizontalHeaderLabels(["Name", "Score", "Grade"])
+        layout.addWidget(self.table)
 
-    def add_score(self) -> None:
-        """Validate and add a score."""
-        text = self.score_input.text().strip()
+        self.setLayout(layout)
 
-        if not text.isdigit():
-            QMessageBox.warning(self, "Invalid Input", "Please enter a valid number.")
+    # ---------------- ACTIONS BELOW ---------------- #
+
+    def add_student(self):
+        name = self.name_input.text().strip()
+        score_text = self.score_input.text().strip()
+
+        if not name:
+            QMessageBox.warning(self, "Error", "Please enter a student name.")
             return
 
-        score = float(text)
+        if not score_text.isdigit():
+            QMessageBox.warning(self, "Error", "Score must be a number.")
+            return
+
+        score = int(score_text)
+        if score < 0 or score > 100:
+            QMessageBox.warning(self, "Error", "Score must be between 0 and 100.")
+            return
+
+        self.names.append(name)
         self.scores.append(score)
-        self.score_list.addItem(f"Score: {score}")
 
+        self.name_input.clear()
         self.score_input.clear()
-        DataStorage.save_scores(self.scores)
 
-    def calculate_grades(self) -> None:
-        """Calculate grades and show result."""
+        QMessageBox.information(self, "Added", f"{name} added.")
+
+    def calculate_grades(self):
         if not self.scores:
-            QMessageBox.warning(self, "Error", "No scores available.")
+            QMessageBox.warning(self, "Error", "No student scores added.")
             return
 
-        grades = GradeCalculator.get_all_grades(self.scores)
+        grades = self.logic.get_all_grades(self.scores)
 
-        msg = "Grades:\n\n"
-        for i, g in enumerate(grades, start=1):
-            msg += f"Student {i}: {g}\n"
+        self.table.setRowCount(len(self.scores))
 
-        QMessageBox.information(self, "Grade Results", msg)
+        for i, (name, score, grade) in enumerate(zip(self.names, self.scores, grades)):
+            self.table.setItem(i, 0, QTableWidgetItem(name))
+            self.table.setItem(i, 1, QTableWidgetItem(str(score)))
+            self.table.setItem(i, 2, QTableWidgetItem(grade))
+
+    def save_csv(self):
+        if not self.scores:
+            QMessageBox.warning(self, "Error", "No data to save.")
+            return
+
+        grades = self.logic.get_all_grades(self.scores)
+        self.storage.save_scores(self.names, self.scores, grades)
+
+        QMessageBox.information(self, "Saved", "Scores saved to scores.csv")
