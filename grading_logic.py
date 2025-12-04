@@ -1,49 +1,23 @@
-"""
-has logic for storing scores, calculating the best score,
-and determining letter grades.
-"""
-
-from typing import List, Tuple
+from typing import List
 
 
-class GradeCalculator:
-    def __init__(self):
-        """Initialize an empty score list."""
-        self.scores: List[int] = []
+class GradingLogic:
+    """
+    Handles grade calculation based on the highest score.
+    """
 
-    def add_score(self, score: int) -> None:
-        """Add a validated score to the list."""
-        self.scores.append(score)
-
-    def clear_scores(self) -> None:
-        """Remove all stored scores."""
-        self.scores.clear()
-
-    def calculate_best(self) -> int:
+    def get_best_score(self, scores: List[int]) -> int:
         """
-        Returns the highest score in the list.
-        Raises ValueError if list is empty.
+        Returns the highest score.
         """
-        if not self.scores:
-            raise ValueError("No scores available to calculate best score.")
-        return max(self.scores)
+        if not scores:
+            return 0
+        return max(scores)
 
-    def calculate_average(self) -> float:
+    def calculate_letter_grade(self, score: float, best: float) -> str:
         """
-        Returns the average score.
-        Raises ValueError if list is empty.
+        Determines a letter grade based on score and best score.
         """
-        if not self.scores:
-            raise ValueError("No scores available to calculate average.")
-        return sum(self.scores) / len(self.scores)
-
-    def letter_grade(self, score: float) -> str:
-        """
-        Determine the letter grade for a given score.
-        Uses the standard grading logic based on the best score.
-        """
-        best = self.calculate_best()
-
         if score >= best - 10:
             return "A"
         elif score >= best - 20:
@@ -55,17 +29,12 @@ class GradeCalculator:
         else:
             return "F"
 
-    def get_all_grades(self) -> List[Tuple[int, str]]:
+    def get_all_grades(self, scores: List[int]) -> List[str]:
         """
-        Returns a list of tuples: (score, letter grade) for each student.
-        Useful for displaying results in the GUI.
+        Returns a list of letter grades for all scores.
         """
-        if not self.scores:
-            raise ValueError("No scores available to generate grade list.")
+        if not scores:
+            return []
 
-        results = []
-        for score in self.scores:
-            letter = self.letter_grade(score)
-            results.append((score, letter))
-
-        return results
+        best = self.get_best_score(scores)
+        return [self.calculate_letter_grade(s, best) for s in scores]
