@@ -1,39 +1,18 @@
-"""
-data_storage.py
-Handles saving and loading student score data to a CSV file.
-"""
-
 import csv
 from typing import List
 
 
 class DataStorage:
-    """Handles CSV storage for student scores."""
+    def __init__(self, filename: str = "scores.csv"):
+        self.filename = filename
 
-    FILE_NAME = "scores.csv"
-
-    @staticmethod
-    def save_scores(scores: List[float]) -> None:
-        """Save list of scores to CSV."""
-        with open(DataStorage.FILE_NAME, "w", newline="") as file:
+    def save_scores(self, names: List[str], scores: List[int], grades: List[str]) -> None:
+        """
+        Saves names, scores, and grades to CSV.
+        """
+        with open(self.filename, "w", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(["score"])
-            for s in scores:
-                writer.writerow([s])
+            writer.writerow(["Name", "Score", "Grade"])
 
-    @staticmethod
-    def load_scores() -> List[float]:
-        """Load all scores from CSV file."""
-        loaded_scores = []
-        try:
-            with open(DataStorage.FILE_NAME, "r") as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    try:
-                        loaded_scores.append(float(row["score"]))
-                    except ValueError:
-                        pass
-        except FileNotFoundError:
-            return []
-
-        return loaded_scores
+            for n, s, g in zip(names, scores, grades):
+                writer.writerow([n, s, g])
