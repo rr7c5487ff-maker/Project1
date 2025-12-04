@@ -1,17 +1,11 @@
-"""
-main.py
-Entry point of the application.
-"""
-
-import sys
 from PyQt6.QtWidgets import QApplication
-from gui_main import GradeApp
+from gui_main import GradeGUI
+import sys
 
 
-def main() -> None:
-    """Start the PyQt application."""
+def main():
     app = QApplication(sys.argv)
-    window = GradeApp()
+    window = GradeGUI()
     window.show()
     sys.exit(app.exec())
 
