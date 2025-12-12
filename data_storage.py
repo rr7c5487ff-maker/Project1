@@ -1,18 +1,27 @@
 import csv
-from typing import List
 
 
 class DataStorage:
-    def __init__(self, filename: str = "scores.csv"):
-        self.filename = filename
+    """
+    Handles CSV file storage.
+    """
 
-    def save_scores(self, names: List[str], scores: List[int], grades: List[str]) -> None:
+    def __init__(self, filename: str = "scores.csv") -> None:
+        self.filename = filename
+        self._initialize_file()
+
+    def _initialize_file(self) -> None:
         """
-        Saves names, scores, and grades to CSV.
+        Clears file on each run and writes header.
         """
         with open(self.filename, "w", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(["Name", "Score", "Grade"])
+            writer.writerow(["Name", "Final Score", "Grade"])
 
-            for n, s, g in zip(names, scores, grades):
-                writer.writerow([n, s, g])
+    def save_record(self, name: str, score: float, grade: str) -> None:
+        """
+        Saves one finalized student record.
+        """
+        with open(self.filename, "a", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow([name, score, grade])
