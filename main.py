@@ -1,9 +1,9 @@
+import sys
 from PyQt6.QtWidgets import QApplication
 from gui_main import GradeGUI
-import sys
 
 
-def main():
+def main() -> None:
     app = QApplication(sys.argv)
     window = GradeGUI()
     window.show()
