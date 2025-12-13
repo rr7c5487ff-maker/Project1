@@ -1,7 +1,9 @@
 import sys
 from PyQt6.QtWidgets import QApplication
 from gui_main import GradeGUI
-
+"""
+Starts main app.
+"""
 
 def main() -> None:
     app = QApplication(sys.argv)
