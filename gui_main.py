@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
 from grading_logic import GradingLogic
 from data_storage import DataStorage
 
-# USED AI FOR A BIT OF GUI CODE, NOT FOR OTHER FILES
+# USED AI FOR SOME GUI CODE, COULD NOT WORK QT DESIGNER FOR SOME REASON.
 class GradeGUI(QWidget):
     """
     GUI for collecting student scores and finalizing grades.
@@ -54,7 +54,7 @@ class GradeGUI(QWidget):
 
     def generate_score_inputs(self) -> None:
         """
-        Creates score input boxes based on number entered (1–4 only).
+        Creates scores input boxes based on number entered (1–4 only).
         """
         for box in self.score_inputs:
             self.layout.removeWidget(box)
@@ -109,11 +109,11 @@ class GradeGUI(QWidget):
             self.generate_score_inputs()
 
         except ValueError:
-            QMessageBox.warning(self, "Error", "Scores must be numeric values.")
+            QMessageBox.warning(self, "Error", "Scores must be numbers.")
 
     def finalize_grades(self) -> None:
         """
-        Calculates grades AFTER all students are entered.
+        Calculates grades after all students are entered.
         """
         if not self.students:
             QMessageBox.warning(self, "Error", "No students entered.")
