@@ -11,7 +11,7 @@ class GradingLogic:
 
     def calculate_letter_grade(self, score: float, best: float) -> str:
         """
-        Determines letter grade relative to best score.
+        Determines letter grade relative to the best score.
         """
         if score >= best - 10:
             return "A"
